@@ -4,21 +4,13 @@ import numpy      as np
 import utility    as ut
 import sys
 from csv import reader
+from prep import write_csv
 
 # Yule-Walker Method
-def yule_walker():
-    
-    # Parámetros por método Yule-Wlker
-    toepliz = mtx_toeplitz()
-    acfv    = acf_lags()
-    
-    pinv_toepliz = pinv_svd(toepliz)    # Pseudo-inversa de la matriz de toepliz
-    acfv_T       = acfv_T.T             # Traspuesta del arreglo valores de la función de auto correlación
-    
-    # Cálculo de los coeficientes
-    coef = np.dot(pinv_toepliz, acfv_T)
-    
-    return coef 
+def yule_walker(pinv_toepliz, acfv_T):
+
+    # Cálculo de los coeficientes    
+    return np.dot(pinv_toepliz, acfv_T)
 
 # Auto covarianza
 def acov(X, k):
@@ -32,6 +24,9 @@ def acov(X, k):
     
     for i in range(N - k):
         sum += (X[i] - mean) * (X[i + k] - mean)
+        
+    if k == N:
+        sys.exit("Division por 0, lag = tamaño de la serie")
     
     return sum / (N - k)
 
@@ -45,8 +40,21 @@ def acf_lags(X, m):
     return acov(X, m) / varianza
     
 # Toeplitz matrix
-def mtx_toeplitz():
-    return 0
+def mtx_toeplitz(X, m):
+    
+    toeplitz = []
+    for k in range(m, 0, -1):          # m filas
+        
+        row = []
+        for i in range(m - k, 0 , -1):          # Rellena hasta el diagonal (sin contar el diagonal)
+            row.append(acf_lags(X, i) )
+        
+        for j in range(0, k):               # Rellena el resto de forma secuencial
+            row.append( acf_lags(X, j) )
+        
+        toeplitz.append(row)
+        
+    return np.matrix(toeplitz)
 
 # Pseudo-inverse by use SVD
 def pinv_svd(matrix):
@@ -62,9 +70,22 @@ def pinv_svd(matrix):
     return pinv_matrix
 
 #AR's Training 
-def train(x,y,param):        
-    return 0
-
+def train(x,y,param):  
+    # Parámetros por método Yule-Wlker
+    # X = matriz autoregresiva
+    # Y = valores de la serie
+    
+    m = param                   # memoria?
+    
+    toepliz = mtx_toeplitz(y, m)
+    acfv    = np.array([acf_lags(y, i) for i in range(1, m + 1)])
+    
+    pinv_toepliz = pinv_svd(toepliz)    # Pseudo-inversa de la matriz de toepliz
+    acfv_T       = acfv.T             # Traspuesta del arreglo valores de la función de auto correlación
+    
+    coefs = np.dot(pinv_toepliz, acfv_T)
+    
+    return coefs
 
 # Load data to train
 def load_data_csv():
@@ -87,14 +108,15 @@ def load_data_csv():
 
 # Save coefficients 
 def save_coef_csv(x):
-  return 0
+    write_csv("coef_h.csv", x)
+    return
   
 # Beginning ...
 def main():
-    #param       = ut.load_conf()            
+    param       = ut.load_conf()    # Supongo que el largo de esa memoria        
     xe,ye       = load_data_csv()   
-    #coef        = train(xe,ye,param)             
-    #save_coef_csv(coef)
+    coef        = train(xe,ye,param)             
+    save_coef_csv(coef)
        
 if __name__ == '__main__':   
 	 main()
