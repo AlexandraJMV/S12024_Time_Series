@@ -98,8 +98,6 @@ def train(x,y,param):
     coefs = np.dot(pinv_toepliz, acfv_T)
     coefs = np.squeeze(coefs)
 
-    print(coefs)
-
     return coefs
 
 # Load data to train
@@ -129,7 +127,7 @@ def load_data_csv():
 
 # Save coefficients 
 def save_coef_csv(x):
-    write_csv("coef_h.csv", x)
+    write_csv("coef_h.csv", [x])
     return
   
 # Beginning ...
