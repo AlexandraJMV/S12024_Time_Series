@@ -91,10 +91,6 @@ def train(x,y,param):
     pinv_toepliz = pinv_svd(toepliz)    # Pseudo-inversa de la matriz de toepliz
     acfv_T       = acfv[:, np.newaxis]  # Traspuesta del arreglo valores de la función de auto correlación
 
-    print(toepliz)
-    print(acfv.shape)
-    print(acfv[:, np.newaxis])
-
     coefs = np.dot(pinv_toepliz, acfv_T)
     coefs = np.squeeze(coefs)
 
@@ -117,7 +113,6 @@ def load_data_csv():
             if not flag:
                 datos = np.hstack( (datos, dato) )
                 flag = True
-
     
     # Separar X de Y
     X = datos[:, 1:]                # Matriz
