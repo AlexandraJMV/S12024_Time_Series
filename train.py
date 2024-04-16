@@ -8,7 +8,6 @@ from prep import write_csv
 
 # Yule-Walker Method
 def yule_walker(pinv_toepliz, acfv_T):
-
     # Cálculo de los coeficientes    
     return np.dot(pinv_toepliz, acfv_T)
 
@@ -42,19 +41,29 @@ def acf_lags(X, m):
 # Toeplitz matrix
 def mtx_toeplitz(X, m):
     
-    toeplitz = []
+    toeplitz = np.array([])
+    flag = False 
+
     for k in range(m, 0, -1):          # m filas
         
         row = []
         for i in range(m - k, 0 , -1):          # Rellena hasta el diagonal (sin contar el diagonal)
-            row.append(acf_lags(X, i) )
+            row.append( acf_lags(X, i) )
         
         for j in range(0, k):               # Rellena el resto de forma secuencial
             row.append( acf_lags(X, j) )
         
-        toeplitz.append(row)
-        
-    return np.matrix(toeplitz)
+        row = np.array(row)
+
+        if flag : toeplitz= np.vstack( (toeplitz, row) )
+
+        if not flag:
+            toeplitz= np.hstack( (toeplitz, row) )
+            flag = True
+
+
+    
+    return toeplitz
 
 # Pseudo-inverse by use SVD
 def pinv_svd(matrix):
@@ -74,36 +83,48 @@ def train(x,y,param):
     # Parámetros por método Yule-Wlker
     # X = matriz autoregresiva
     # Y = valores de la serie
-    
-    m = param                   # memoria?
+    m, p = param                   # memoria, prop
     
     toepliz = mtx_toeplitz(y, m)
     acfv    = np.array([acf_lags(y, i) for i in range(1, m + 1)])
     
     pinv_toepliz = pinv_svd(toepliz)    # Pseudo-inversa de la matriz de toepliz
-    acfv_T       = acfv.T             # Traspuesta del arreglo valores de la función de auto correlación
-    
+    acfv_T       = acfv[:, np.newaxis]  # Traspuesta del arreglo valores de la función de auto correlación
+
+    print(toepliz)
+    print(acfv.shape)
+    print(acfv[:, np.newaxis])
+
     coefs = np.dot(pinv_toepliz, acfv_T)
-    
+    coefs = np.squeeze(coefs)
+
+    print(coefs)
+
     return coefs
 
 # Load data to train
 def load_data_csv():
     path = "trn_h.csv"
-    datos = []
+    datos = np.array([])
+    flag = False
 
     with open(path, mode = 'r') as archivo_data:
         lector = reader( archivo_data )
     
-        for linea in lector:
-            dato = [float(i) for i in linea]
-            datos.append(dato)
-    datos = np.matrix(datos)
+        for linea in lector:                
+            dato = np.array([float(i) for i in linea])
+            
+            if flag : datos = np.vstack( (datos, dato) )
+
+            if not flag:
+                datos = np.hstack( (datos, dato) )
+                flag = True
+
     
     # Separar X de Y
-    X = datos[:, 1:]
-    Y = datos[:, 0]
-    
+    X = datos[:, 1:]                # Matriz
+    Y = np.squeeze(datos[:, 0])     # Vector 
+
     return X, Y
 
 # Save coefficients 

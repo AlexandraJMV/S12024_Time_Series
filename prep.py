@@ -65,13 +65,8 @@ def main():
     Param     = ut.load_conf()	
     Data      = load_data_csv()	
     
-    Param = 3, 80
-    Data = [1,2,3,4,5,6,7,8,9,10,11,12]
-    
     dtrn,dtst = ar_matrix(Data, Param)  
-    
     save_data_csv(dtrn,dtst)
-
 
 if __name__ == '__main__':   
 	 main()
