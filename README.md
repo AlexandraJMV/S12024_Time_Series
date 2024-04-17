@@ -6,3 +6,5 @@
 
 The yule walker equiations for the AR coefficients 
 
+
+m  = memoria = valores anteriores contados en el modelo = orden del modelo

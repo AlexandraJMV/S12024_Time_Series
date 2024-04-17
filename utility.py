@@ -79,8 +79,7 @@ def metricas(x : np.array, y: np.array)->list[float]:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-""" Auto covarianza """
-
+# Auto covarianza 
 def acov(series_data : np.array, lag : int)-> float:
     
     """
@@ -104,7 +103,7 @@ def acov(series_data : np.array, lag : int)-> float:
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-""" Lectura y escritura de datos """
+# Lectura y escritura de datos
 
 def write_csv(path : str, data : list[any], row : bool = True) -> None:
   """

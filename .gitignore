@@ -4,3 +4,5 @@ tst_h.csv
 *.ipynb
 *.csv
 *.txt
+*.png
+pruebas.py
