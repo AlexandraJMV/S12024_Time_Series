@@ -3,39 +3,20 @@
 import numpy      as np
 import utility    as ut
 import sys
-from csv import reader
 
 # Yule-Walker Method
 def yule_walker(pinv_toepliz, acfv_T):
     # Cálculo de los coeficientes    
     return np.dot(pinv_toepliz, acfv_T)
 
-# Auto covarianza
-def acov(X, k):
-    """
-    X : data
-    k : lags
-    """
-    sum = 0
-    N   = len(X)
-    mean = X.mean()
-    
-    for i in range(N - k):
-        sum += (X[i] - mean) * (X[i + k] - mean)
-        
-    if k == N:
-        sys.exit("Division por 0, lag = tamaño de la serie")
-    
-    return sum / (N - k)
-
 # ACF for m-lags
 def acf_lags(X, m):
-    varianza = acov(X, 0)
+    varianza = ut.acov(X, 0)
 
     if varianza == 0:
         sys.exit("Varianza 0, imposible calcular la autocorrelación")
         
-    return acov(X, m) / varianza
+    return ut.acov(X, m) / varianza
     
 # Toeplitz matrix
 def mtx_toeplitz(X, m):
@@ -96,23 +77,10 @@ def train(x,y,param):
     return coefs
 
 # Load data to train
-def load_data_csv(path : str = None ) -> None:
-    if not path: path = "trn_h.csv"     # Default
-
-    datos = np.array([])
-    flag = False
-
-    with open(path, mode = 'r') as archivo_data:
-        lector = reader( archivo_data )
+def load_data_csv() -> None:
     
-        for linea in lector:                
-            dato = np.array([float(i) for i in linea])
-            
-            if flag : datos = np.vstack( (datos, dato) )
-
-            if not flag:
-                datos = np.hstack( (datos, dato) )
-                flag = True
+    path = "trn_h.csv"  
+    datos = ut.load_data_csv(path)
     
     # Separar X de Y
     X = datos[:, 1:]                # Matriz

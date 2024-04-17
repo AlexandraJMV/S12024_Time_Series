@@ -7,15 +7,10 @@ import utility    as ut
 # Load data from data.csv
 def load_data_csv():
   path = "data.csv"
-  datos = []
+  datos = ut.load_data_csv(path)
 
-  with open(path, mode = 'r') as archivo_data:
-    lector = reader( archivo_data )
-    
-    for linea in lector:
-      dato = float(linea[0])
-      datos.append(dato)
-    
+  # Transformamos la matriz con la serie a un arreglo 
+  datos = np.squeeze(datos)
   return datos
 
 
