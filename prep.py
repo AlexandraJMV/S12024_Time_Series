@@ -1,5 +1,5 @@
 import numpy      as np
-from   csv    import reader, writer 
+from   csv    import reader 
 import utility    as ut
 
 # Qur son interpretadores y como los usa el compu
@@ -42,23 +42,16 @@ def ar_matrix(X,Param):
   test = AR_X[index:]
     
   return train, test
-
-def write_csv(path, data):
-  with open(path, mode = 'w', newline='') as archivo:
-    
-    data_writer = writer(archivo)
-    for point in data:
-      data_writer.writerow(point)
       
 # Save Data 
 def save_data_csv(X,Y):
   train_path = "trn_h.csv"
   test_path  = "tst_h.csv"
   
-  write_csv(train_path, X)
-  write_csv(test_path, Y)
+  ut.write_csv(train_path, X)
+  ut.write_csv(test_path, Y)
+  
   return
-
 
 # Beginning ...
 def main():        

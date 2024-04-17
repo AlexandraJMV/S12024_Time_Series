@@ -4,7 +4,6 @@ import numpy      as np
 import utility    as ut
 import sys
 from csv import reader
-from prep import write_csv
 
 # Yule-Walker Method
 def yule_walker(pinv_toepliz, acfv_T):
@@ -97,8 +96,9 @@ def train(x,y,param):
     return coefs
 
 # Load data to train
-def load_data_csv():
-    path = "trn_h.csv"
+def load_data_csv(path : str = None ) -> None:
+    if not path: path = "trn_h.csv"     # Default
+
     datos = np.array([])
     flag = False
 
@@ -122,7 +122,7 @@ def load_data_csv():
 
 # Save coefficients 
 def save_coef_csv(x):
-    write_csv("coef_h.csv", [x])
+    ut.write_csv("coef_h.csv", x, row = False)
     return
   
 # Beginning ...
