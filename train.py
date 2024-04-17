@@ -2,6 +2,7 @@
 
 import numpy      as np
 import utility    as ut
+import sys
 from csv import reader          # HAY QUE SACAR EL READER Y LEER CON NUMPY !
 from prep import write_csv
 
@@ -24,6 +25,9 @@ def acov(X, k):
     for i in range(N - k):
         sum += (X[i] - mean) * (X[i + k] - mean)
         
+    if k == N:
+        sys.exit("Division por 0, lag = tamaño de la serie")
+    
     return sum / (N - k)
 
 # ACF for m-lags

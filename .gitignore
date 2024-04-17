@@ -1,3 +1,8 @@
 __pycache__
 trn_h.csv
 tst_h.csv
+*.ipynb
+*.csv
+*.txt
+*.png
+pruebas.py

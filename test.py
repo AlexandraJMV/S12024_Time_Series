@@ -1,32 +1,44 @@
 import numpy as np
-import train as tr
+import utility as ut
 
+def load_data_csv():
+	path= "tst_h.csv"
+	datos = ut.load_data_csv(path)
 
-matrix = [
-    [0.9794, 1.8407],
-    [0.6790, 0.1054],
-    [1.9033, 1.4757]
-]
+	# Separar X de Y
+	X = datos[:, 1:]                # Matriz
+	Y = np.squeeze(datos[:, 0])     # Vector 
 
-time_series = np.array([1,2,3,4,5,6,7,8,9,10,11,12])
+	return X,Y
 
-U, S, Vh = np.linalg.svd(matrix, full_matrices = False)
+def load_coef_csv():
+	path = "coef_h.csv"
+	data = ut.load_data_csv(path)
+	
+	return data
 
-print(tr.pinv_svd(matrix))
-print(tr.acf_lags(time_series, 0))
+def fordward(x: np.array ,a: np.array):
+    return np.dot(x, a)
 
-print()
+def save_measure_csv(metricas : list, y_true: np.array, y_pred: np.array):
 
-print(tr.mtx_toeplitz(time_series, m = 4))
+	# Escritura de metricas
+	ut.write_csv("metrica_h.csv", metricas, row = False)
 
-import numpy as np
-from scipy.linalg import toeplitz
+	# Escritura valor real vs valor predicho
+	data = np.column_stack( (y_true, y_pred) )
+	ut.write_csv("est_h.csv", data)
 
-# Example autocovariance values
-autocovariance = [1.0, 0.8, 0.6, 0.4, 0.2]
+	return
 
-# Create a Toeplitz matrix using autocovariance values
-toeplitz_matrix = toeplitz(autocovariance)
+# Beginning ...
+def main():			
+	xv,yv  = load_data_csv()
+	a      = load_coef_csv()
+	zv     = fordward(xv,a)   
 
-print("Toeplitz Matrix:")
-print(toeplitz_matrix)
+	List   = ut.metricas(yv,zv) 	
+	save_measure_csv(List, yv, zv)
+
+if __name__ == '__main__':   
+	 main()
