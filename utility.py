@@ -1,13 +1,14 @@
 # My Utility : auxiliars functions
 
 import numpy  as np
-from csv import writer, reader 
-import sys
+import pandas as pd
   
 #load parameters from conf.csv
 def load_conf():
-    # memoria, proporcion test-train 
-    return 3, 80
+    # porcentaje test-train , lag maximo : memoria maxima , horizonte : h
+    path = "config.csv"
+    conf = load_data_csv(path, type = int)
+    return conf
 
 # Measure
 def mean_abs_error(yv : np.array, yp : np.array)->float:
@@ -17,6 +18,7 @@ def mean_abs_error(yv : np.array, yp : np.array)->float:
 
   Calcula el MAE dados los valores reales e inferidos
   """
+  
   N = len(yv)                   # Largo de la serie
 
   error = np.abs(yv - yp)    # Calculamos valor absoluto de los errores
@@ -111,41 +113,23 @@ def write_csv(path : str, data : list[any], row : bool = True) -> None:
   data : lista de datos a escribir 
   row  : Indicador si data es una lista de listas
 
-  Escribe una linea de datos en un archivo CSV.
-  Cada elemento de la lista 'data' debe ser una lista con datos por linea
+  Escribe un arreglo o matriz datos en un archivo CSV.
+  Cada elemento de la lista debe ser una lista de lo que se desea que este en una linea
   """
   if not row : data = [data]
+  
+  df = pd.DataFrame(data)
+  df.to_csv(path, index = False, header=False)
+  
+  #np.savetxt(path, data, delimiter = ',', fmt='%f')
 
-  with open(path, mode = 'w', newline='') as archivo:
-
-    data_writer = writer(archivo)
-    for point in data:
-      data_writer.writerow(point)
-
-def load_data_csv(path : str) -> None :
+def load_data_csv(path : str, type = float) -> np.array :
   """
   path : Nombre del archivo a leer
 
   Lee un archivo csv guardando cada una de sus lineas en un arreglo. 
-  Apila cada linea verticalmente
-  
   Transforma cada elemento leido en un float 
   """
-   
-  datos = np.array([])       # Almacenamiento de datos 
-  flag = False
-
-  with open(path, mode = 'r') as archivo_data:
-    lector = reader( archivo_data )
-
-    for linea in lector:
-      dato = np.array([float(i) for i in linea])
-
-      if flag : datos = np.vstack( (datos, dato) )
-
-      if not flag:
-        datos = np.hstack( (datos, dato) )
-        flag = True
-
-  return datos
+  data = np.loadtxt(path, delimiter= ",", dtype = type)
+  return data
 
