@@ -1,15 +1,12 @@
 import numpy      as np
 import utility    as ut
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Load data from data.csv
 def load_data_csv():
     path = "est_h.csv"
     data = ut.load_data_csv(path)
     return data
-
-# TODO: Que es eso de h....... BUA
 
 def plot_series(values : np.array, estimate : np.array ) -> None :
     title = "Valor real vs. valor estimado"

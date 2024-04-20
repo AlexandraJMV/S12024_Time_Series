@@ -58,27 +58,47 @@ def pinv_svd(matrix):
     return pinv_matrix
 
 #AR's Training 
-def train(x,y,param):  
+def train(x,y,memory, horizon):  
     # Parámetros por método Yule-Wlker
     # X = matriz autoregresiva
     # Y = valores de la serie
-    m, p = param                   # memoria, prop
     
-    toepliz = mtx_toeplitz(y, m)
-    acfv    = np.array([acf_lags(y, i) for i in range(1, m + 1)])
+    AIC_vec = []
+    N = len(y)
     
-    pinv_toepliz = pinv_svd(toepliz)    # Pseudo-inversa de la matriz de toepliz
-    acfv_T       = acfv[:, np.newaxis]  # Traspuesta del arreglo valores de la función de auto correlación
-
-    coefs = np.dot(pinv_toepliz, acfv_T)
-    coefs = np.squeeze(coefs)
+    # Probamos para cada valor de memoria m
+    for m in range(1, memory + 1):
+    
+    # Estimación de parámetros a en Xa =Y 
+        toepliz = mtx_toeplitz(y, m)       
+        acfv    = np.array([acf_lags(y, i) for i in range(1, m + 1)])
+        
+        pinv_toepliz = pinv_svd(toepliz)    # Pseudo-inversa de la matriz de toepliz
+        acfv_T       = acfv[:, np.newaxis]  # Traspuesta del arreglo valores de la función de auto correlación
+        
+        coefs = np.dot(pinv_toepliz, acfv_T)
+        coefs = np.squeeze(coefs)
+        
+        # Hacemos una predicción
+        pred = np.dot(x, coefs)
+        
+        # Calculamos el SSE
+        SSE = ut.mean_squared_error(y, pred)
+        
+        # AIC
+        
+        AIC = np.log(SSE) + ( (2 * (m + 2)) / (N - m - 3) )
+        AIC_vec.append(AIC)
+        
+    # Extraemos el indice de que tiene el menor AIC
+    # memory final ; index delmenor AIC + 1
 
     return coefs
 
 # Load data to train
-def load_data_csv() -> np.array:
+def load_data_csv(horizon) -> np.array:
     
-    path = "trn_h.csv"  
+    path = f"trn_{horizon}.csv"  
     datos = ut.load_data_csv(path)
     
     # Separar X de Y
@@ -88,16 +108,21 @@ def load_data_csv() -> np.array:
     return X, Y
 
 # Save coefficients 
-def save_coef_csv(x):
-    ut.write_csv("coef_h.csv", x, row = False)
+def save_coef_csv(x, horizon):
+    path = f"coef_{horizon}.csv"
+    ut.write_csv(path, x, row = False)
     return
   
 # Beginning ...
 def main():
-    param       = ut.load_conf()    # Supongo que el largo de esa memoria        
-    xe,ye       = load_data_csv()   
-    coef        = train(xe,ye,param)             
-    save_coef_csv(coef)
+    param       = ut.load_conf()    
+    
+    memo, prop, horizon = param
+    xe,ye         = load_data_csv(horizon)   
+    
+    coef        = train(xe,ye, memo, horizon)      
+           
+    save_coef_csv(coef, horizon)
        
 if __name__ == '__main__':   
 	 main()

@@ -32,12 +32,7 @@ def root_mean_squared_error(yv : np.array, yp :np.array) -> float :
 
   Calcula el rmse dados los valores reales e inferidos
   """
-  N = len(yv)
-
-  error = np.square(yv - yp)
-  mse = np.sum(error) / N
-
-  return np.sqrt(mse)
+  return np.sqrt( mean_squared_error(yv, yp) )
 
 def r_2(yv : np.array , yp : np.array) -> float:
   """
@@ -78,6 +73,20 @@ def metricas(x : np.array, y: np.array)->list[float]:
             root_mean_squared_error(x, y),
             r_2(x, y),
             modified_NS_efficiency(x, y)]
+
+def mean_squared_error(yv : np.ndarray, yp : np.ndarray) -> float:
+  """
+  yv : Valores verdaderos
+  yp : Valores inferidos
+
+  Calcula el mse dados los valores reales e inferidos
+  """
+  N = len(yv)
+
+  error = np.square(yv - yp)
+  mse = np.sum(error) / N
+  
+  return mse
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -121,8 +130,6 @@ def write_csv(path : str, data : list[any], row : bool = True) -> None:
   df = pd.DataFrame(data)
   df.to_csv(path, index = False, header=False)
   
-  #np.savetxt(path, data, delimiter = ',', fmt='%f')
-
 def load_data_csv(path : str, type = float) -> np.array :
   """
   path : Nombre del archivo a leer

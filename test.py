@@ -18,7 +18,7 @@ def load_coef_csv():
 	return data
 
 def fordward(x: np.array ,a: np.array):
-    return np.dot(x, a)
+    return 
 
 def save_measure_csv(metricas : list, y_true: np.array, y_pred: np.array):
 

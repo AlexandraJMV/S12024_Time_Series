@@ -68,7 +68,6 @@ def save_data_csv(X : np.ndarray , Y : np.ndarray, h : int) -> None :
   
   return
 
-
 # Beginning ...
 def main():        
     Param     = ut.load_conf()	
