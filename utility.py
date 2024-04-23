@@ -6,12 +6,14 @@ import pandas as pd
 #load parameters from conf.csv
 def load_conf():
     # porcentaje test-train , lag maximo : memoria maxima , horizonte : h
-    path = "config.csv"
-    conf = load_data_csv(path, type = int)
+    path = "conf.csv"
+    conf = load_data_csv(path, type = float)
+    conf = conf[0], int(conf[1]), int(conf[2])
+
     return conf
 
 # Measure
-def mean_abs_error(yv : np.array, yp : np.array)->float:
+def mean_abs_error(yv, yp ):
   """
   yv : Valores verdaderos
   yp : Valores inferidos
@@ -25,7 +27,7 @@ def mean_abs_error(yv : np.array, yp : np.array)->float:
   mae = np.sum(error)/ N     # Promediado del valor absoluto de los errores 
   return mae
 
-def root_mean_squared_error(yv : np.array, yp :np.array) -> float :
+def root_mean_squared_error(yv, yp ) :
   """
   yv : Valores verdaderos
   yp : Valores inferidos
@@ -34,7 +36,7 @@ def root_mean_squared_error(yv : np.array, yp :np.array) -> float :
   """
   return np.sqrt( mean_squared_error(yv, yp) )
 
-def r_2(yv : np.array , yp : np.array) -> float:
+def r_2(yv, yp):
   """
   yv : Valores verdaderos
   yp : Valores inferidos
@@ -49,7 +51,7 @@ def r_2(yv : np.array , yp : np.array) -> float:
 
   return 1 - (error_variance / true_variance)
 
-def modified_NS_efficiency(yv : np.array, yp : np.array) -> float :
+def modified_NS_efficiency(yv, yp ):
 
   mean = np.mean(yv)
   abs_error = np.abs( yv - yp )  
@@ -59,7 +61,7 @@ def modified_NS_efficiency(yv : np.array, yp : np.array) -> float :
 
   return 1 - factor
 
-def metricas(x : np.array, y: np.array)->list[float]:
+def metricas(x , y):
     """
     x : Valores reales de una serie de tiempo
     y : Valores estimados de una serie de tiempo
@@ -74,24 +76,31 @@ def metricas(x : np.array, y: np.array)->list[float]:
             r_2(x, y),
             modified_NS_efficiency(x, y)]
 
-def mean_squared_error(yv : np.ndarray, yp : np.ndarray) -> float:
+def squared_error(yv, yp) -> float:
   """
   yv : Valores verdaderos
   yp : Valores inferidos
 
   Calcula el mse dados los valores reales e inferidos
   """
-  N = len(yv)
+  error = np.sum((yv - yp) ** 2)
+  return error
 
-  error = np.square(yv - yp)
-  mse = np.sum(error) / N
+def mean_squared_error(yv, yp ) :
+  """
+  yv : Valores verdaderos
+  yp : Valores inferidos
+
+  Calcula el mse dados los valores reales e inferidos
+  """
   
-  return mse
+  return squared_error(yv, yp) / len(yv)
+
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Auto covarianza 
-def acov(series_data : np.array, lag : int)-> float:
+def acov(series_data, lag ):
     
     """
     series_data : numpy array con los datos de la serie de tiempo
@@ -99,24 +108,17 @@ def acov(series_data : np.array, lag : int)-> float:
 
     Calcula la auto-covarianza de una serie de tiempo para un cierto lag 
     """
-
-    sum = 0
     N   = len(series_data)
     mean = series_data.mean()
-    
-    for i in range(N - lag):
-        sum += (series_data[i] - mean) * (series_data[i + lag] - mean)
-        
-    if lag == N:
-        sys.exit("Division por 0, lag = tamaño de la serie")
-    
+
+    sum = np.sum( (series_data[: N - lag] - mean) * (series_data[lag:] - mean) ) 
     return sum / (N - lag)
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # Lectura y escritura de datos
 
-def write_csv(path : str, data : list[any], row : bool = True) -> None:
+def write_csv(path , data , row  = True):
   """
   path : nombre del archivo
   data : lista de datos a escribir 
@@ -130,7 +132,7 @@ def write_csv(path : str, data : list[any], row : bool = True) -> None:
   df = pd.DataFrame(data)
   df.to_csv(path, index = False, header=False)
   
-def load_data_csv(path : str, type = float) -> np.array :
+def load_data_csv(path , type = float):
   """
   path : Nombre del archivo a leer
 

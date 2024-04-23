@@ -13,7 +13,7 @@ def load_data_csv():
 
 
 # Create Auto-regressive-Matrix 
-def ar_matrix(X : np.ndarray, proportion : int, memory : int , horizon : int):
+def ar_matrix(X  , memory  , horizon):
 
   # Matriz autoregresiva
   AR_X = np.array([])
@@ -39,18 +39,24 @@ def ar_matrix(X : np.ndarray, proportion : int, memory : int , horizon : int):
       flag = True
     else:
       AR_X = np.vstack(( AR_X, row ))
+
+  # Separamos serie de la matriz
+  Y = np.squeeze(AR_X[:, 0])
+  x = AR_X[:, 1:]
       
-  # Ahora separamos en training y testing
-  cant_data = len(AR_X)
-  index = int( (cant_data * proportion) / 100 )
-  
-  train = AR_X[:index]
-  test = AR_X[index:]
-  
+  return Y, x
+
+def test_train_split(Data, proportion):
+  cant_data = len(Data)
+  index = int( (cant_data * proportion) )
+
+  train = Data[:index]
+  test = Data[index:]
+
   return train, test
 
 # Save Data 
-def save_data_csv(X : np.ndarray , Y : np.ndarray, h : int) -> None :
+def save_data_csv(X , Y, h ) :
   """
   Guarda los datos de entrenamiento y testeo para un horizonte H
   
@@ -73,13 +79,14 @@ def main():
     Param     = ut.load_conf()	
     Data      = load_data_csv()	
     
-    memo, prop, horizon = Param
-    Data = [1,2,3,4,5,6,7,8,9,10,11,12]
+    prop, memo, horizon = Param
     
-    dtrn,dtst = ar_matrix(Data, prop, memo, horizon) 
+    # Separamos datos de intrenamiento - test (Vector con la serie)
+    dtrn,dtst = test_train_split(Data, prop) 
+
+    # Guardamos
     save_data_csv(dtrn, dtst, horizon)
-
-
+    
 if __name__ == '__main__':   
 	 main()
 
