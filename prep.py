@@ -80,7 +80,7 @@ def main():
     Data      = load_data_csv()	
     
     prop, memo, horizon = Param
-    
+
     # Separamos datos de intrenamiento - test (Vector con la serie)
     dtrn,dtst = test_train_split(Data, prop) 
 

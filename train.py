@@ -27,8 +27,9 @@ def yule_walker(pinv_toepliz, acfv_T):
     return np.dot(pinv_toepliz, acfv_T)
 
 # ACF for m-lags
-def acf_lags(X, m):
+def acf_lags(X, m, flag = False):
     varianza = ut.acov(X, 0)
+    if flag : print("auto corr for lag ", m)
     return ut.acov(X, m) / varianza
     
 # Toeplitz matrix
@@ -37,17 +38,22 @@ def mtx_toeplitz(X, m):
     toeplitz = np.array([])
     flag = False 
     count = 0
+    indexes = []
+
 
     for k in range(m, 0, -1):          # m filas
-        
         row = []
+        index = []
         for i in range(m - k, 0 , -1):          # Rellena hasta el diagonal (sin contar el diagonal)
             row.append( acf_lags(X, i) )
+            index.append(i)
         
         for j in range(0, k):               # Rellena el resto de forma secuencial
             row.append( acf_lags(X, j) )
+            index.append(j)
         
         row = np.array(row)
+        indexes.append(index)
 
         if flag : toeplitz= np.vstack( (toeplitz, row) )
 
@@ -60,7 +66,6 @@ def mtx_toeplitz(X, m):
     # Si es que m = 1, se asegura que devuelva una matriz
     if count == 1 :
         toeplitz = np.expand_dims(toeplitz, axis=0)
-
     return toeplitz
 
 # Pseudo-inverse by use SVD
@@ -79,6 +84,7 @@ def pinv_svd(matrix):
 def construct_yule_walker(series, memory):
     toepliz = mtx_toeplitz(series, memory) 
     acfv    = np.array([acf_lags(series, i) for i in range(1, memory + 1)])
+
     
     pinv_toepliz = pinv_svd(toepliz)    # Pseudo-inversa de la matriz de toepliz
     return pinv_toepliz, acfv
@@ -95,12 +101,15 @@ def train(y,memory, horizon):
     coefs_vec = []
     error = []
 
+    y = y[:20]
+
     # Probamos para cada valor de memoria m
     for m in range(1, memory + 1):
 
         # Creacion de la matriz regresora
         series, matrix = ar_matrix(y, m, horizon)
-        N = len(series)
+
+        N = len(y)
 
         # Creamos la matriz de toeplitz y el vector relevantes
         toe, acfv = construct_yule_walker(series, m)
@@ -108,27 +117,30 @@ def train(y,memory, horizon):
         # Calculamos los coeficientes
         coefs = yule_walker(toe, acfv)
         coefs_vec.append(coefs)
-        
+
         # Hacemos una predicción
         pred = fordward(matrix, coefs)
         pred = np.squeeze(pred)
 
-        plot_series(series, pred, m)
+        # que es la transformada Z 
 
         # Calculamos el SSE
         SSE = ut.squared_error(series, pred)
-        error.append( ut.mean_squared_error(series, pred) )
+        err =  ut.mean_squared_error(series, pred) 
 
+        error.append(err)
         # AIC
         AIC = np.log(SSE) + ( (2 * (m + 2) / ( N - m - 3)) )
-        BIC = 2 * np.log( SSE / (N - m)) + ((m / N)* np.log(N))
-        AIC_vec.append(BIC)
+        AIC_vec.append(AIC)
         
     # Extraemos el indice de que tiene el menor AIC
     # memory final ; index del menor AIC + 1
 
+    print(AIC_vec)
+
     best = np.argmin(AIC_vec, axis = 0)
     best_coefs = np.squeeze(coefs_vec[best])
+    print(coefs_vec)
 
     return best_coefs
 
